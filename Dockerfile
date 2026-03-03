@@ -1,6 +1,8 @@
 # --- Build Stage ---
 FROM node:20-alpine AS builder
+
 RUN apk add --no-cache openssl
+
 WORKDIR /app
 
 COPY package*.json ./
@@ -17,18 +19,20 @@ RUN npm run build
 
 # --- Production Stage ---
 FROM node:20-alpine AS production
+
 RUN apk add --no-cache openssl
+
 WORKDIR /app
 
-ENV NODE_ENV=production
-
 COPY package*.json ./
-RUN npm ci --only=production
+COPY prisma.config.ts ./
+
+RUN npm ci --only=production && npm install prisma@7.4.0
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/prisma.config.ts ./
+
+ENV NODE_ENV=production
 
 CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
