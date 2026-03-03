@@ -70,7 +70,7 @@ export class CreateCronCommand extends Command {
                             //.setAutocomplete(true)
                             .setChoices(BOORU_CHOICES)),
             {
-                guildIds: ["430980608257294336"],
+                guildIds: [],
                 idHints: [],
                 behaviorWhenNotIdentical: RegisterBehavior.Overwrite
             }
