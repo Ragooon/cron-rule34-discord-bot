@@ -1,7 +1,7 @@
-import { Command } from '@sapphire/framework';
-import { PermissionFlagsBits, MessageFlags } from 'discord.js';
-import { CronService } from '../lib/cronService';
-import { InteractionContextType } from 'discord.js';
+import {Command, RegisterBehavior} from '@sapphire/framework';
+import {PermissionFlagsBits, MessageFlags} from 'discord.js';
+import {CronService} from '../lib/cronService';
+import {InteractionContextType} from 'discord.js';
 
 export class DeleteCronCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -14,19 +14,23 @@ export class DeleteCronCommand extends Command {
 
     public override registerApplicationCommands(registry: Command.Registry): void {
         registry.registerChatInputCommand((builder) =>
-            builder
-                .setName(this.name)
-                .setDescription(this.description)
-                .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-                .setContexts(InteractionContextType.Guild)
-                .addStringOption((option) =>
-                    option
-                        .setName('id')
-                        .setDescription('The cronjob ID to delete')
-                        .setRequired(true)
-                        .setAutocomplete(true)
-                ),
-            { idHints: [] }
+                builder
+                    .setName(this.name)
+                    .setDescription(this.description)
+                    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+                    .setContexts(InteractionContextType.Guild)
+                    .addStringOption((option) =>
+                        option
+                            .setName('id')
+                            .setDescription('The cronjob ID to delete')
+                            .setRequired(true)
+                            .setAutocomplete(true)
+                    ),
+            {
+                guildIds: [],
+                idHints: [],
+                behaviorWhenNotIdentical: RegisterBehavior.Overwrite
+            }
         );
     }
 
@@ -61,7 +65,7 @@ export class DeleteCronCommand extends Command {
     }
 
     public override async chatInputRun(interaction: Command.ChatInputCommandInteraction): Promise<void> {
-        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
 
         const cronjobId = interaction.options.getString('id', true);
         const guildId = interaction.guildId!;

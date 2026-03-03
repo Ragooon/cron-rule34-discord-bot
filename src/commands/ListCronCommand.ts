@@ -1,4 +1,4 @@
-import { Command } from '@sapphire/framework';
+import {Command, RegisterBehavior} from '@sapphire/framework';
 import {
     PermissionFlagsBits,
     EmbedBuilder,
@@ -7,7 +7,7 @@ import {
     MessageFlags,
     InteractionContextType
 } from 'discord.js';
-import { CronService } from '../lib/cronService';
+import {CronService} from '../lib/cronService';
 
 export class ListCronCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -20,23 +20,27 @@ export class ListCronCommand extends Command {
 
     public override registerApplicationCommands(registry: Command.Registry): void {
         registry.registerChatInputCommand((builder) =>
-            builder
-                .setName(this.name)
-                .setDescription(this.description)
-                .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-                .setContexts(InteractionContextType.Guild)
-                .addBooleanOption((option) =>
-                    option
-                        .setName('show-inactive')
-                        .setDescription('Also show inactive/disabled cronjobs')
-                        .setRequired(false)
-                ),
-            { idHints: [] }
+                builder
+                    .setName(this.name)
+                    .setDescription(this.description)
+                    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+                    .setContexts(InteractionContextType.Guild)
+                    .addBooleanOption((option) =>
+                        option
+                            .setName('show-inactive')
+                            .setDescription('Also show inactive/disabled cronjobs')
+                            .setRequired(false)
+                    ),
+            {
+                guildIds: [],
+                idHints: [],
+                behaviorWhenNotIdentical: RegisterBehavior.Overwrite
+            }
         );
     }
 
     public override async chatInputRun(interaction: Command.ChatInputCommandInteraction): Promise<void> {
-        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
 
         const guildId = interaction.guildId!;
         const showInactive = interaction.options.getBoolean('show-inactive') || false;
@@ -71,7 +75,7 @@ export class ListCronCommand extends Command {
                 const status = job.isActive ? '✅' : '❌';
 
                 // Get next run time from Redis
-                const redisInfo = job.isActive ? await CronService.getRedisJobInfo(job.id) : { exists: false };
+                const redisInfo = job.isActive ? await CronService.getRedisJobInfo(job.id) : {exists: false};
                 const nextRunText = redisInfo.nextRun
                     ? `**Next:** <t:${Math.floor(redisInfo.nextRun.getTime() / 1000)}:R>`
                     : '';
@@ -100,10 +104,10 @@ export class ListCronCommand extends Command {
             }
 
             if (cronjobs.length > 10) {
-                embed.setFooter({ text: `Showing 10 of ${cronjobs.length} cronjobs` });
+                embed.setFooter({text: `Showing 10 of ${cronjobs.length} cronjobs`});
             }
 
-            await interaction.editReply({ embeds: [embed] });
+            await interaction.editReply({embeds: [embed]});
 
         } catch (error) {
             this.container.logger.error('[ListCrons] Failed to list cronjobs:', error);

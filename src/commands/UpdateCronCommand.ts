@@ -1,4 +1,4 @@
-import {Command} from '@sapphire/framework';
+import {Command, RegisterBehavior} from '@sapphire/framework';
 import {ChannelType, InteractionContextType, MessageFlags, PermissionFlagsBits} from 'discord.js';
 import {CronService} from '../lib/cronService';
 import {
@@ -87,7 +87,11 @@ export class UpdateCronCommand extends Command {
                             .setDescription('Enable or disable the cronjob')
                             .setRequired(false)
                     ),
-            {idHints: []}
+            {
+                guildIds: [],
+                idHints: [],
+                behaviorWhenNotIdentical: RegisterBehavior.Overwrite
+            }
         );
     }
 

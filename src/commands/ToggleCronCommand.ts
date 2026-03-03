@@ -1,6 +1,6 @@
-import { Command } from '@sapphire/framework';
+import {Command, RegisterBehavior} from '@sapphire/framework';
 import {PermissionFlagsBits, MessageFlags, InteractionContextType} from 'discord.js';
-import { CronService } from '../lib/cronService';
+import {CronService} from '../lib/cronService';
 
 export class ToggleCronCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -13,19 +13,23 @@ export class ToggleCronCommand extends Command {
 
     public override registerApplicationCommands(registry: Command.Registry): void {
         registry.registerChatInputCommand((builder) =>
-            builder
-                .setName(this.name)
-                .setDescription(this.description)
-                .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-                .setContexts(InteractionContextType.Guild)
-                .addStringOption((option) =>
-                    option
-                        .setName('id')
-                        .setDescription('The cronjob ID to toggle')
-                        .setRequired(true)
-                        .setAutocomplete(true)
-                ),
-            { idHints: [] }
+                builder
+                    .setName(this.name)
+                    .setDescription(this.description)
+                    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+                    .setContexts(InteractionContextType.Guild)
+                    .addStringOption((option) =>
+                        option
+                            .setName('id')
+                            .setDescription('The cronjob ID to toggle')
+                            .setRequired(true)
+                            .setAutocomplete(true)
+                    ),
+            {
+                guildIds: [],
+                idHints: [],
+                behaviorWhenNotIdentical: RegisterBehavior.Overwrite
+            }
         );
     }
 
@@ -63,7 +67,7 @@ export class ToggleCronCommand extends Command {
     }
 
     public override async chatInputRun(interaction: Command.ChatInputCommandInteraction): Promise<void> {
-        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
 
         const cronjobId = interaction.options.getString('id', true);
         const guildId = interaction.guildId!;
@@ -95,7 +99,7 @@ export class ToggleCronCommand extends Command {
                 }
             }
 
-            await interaction.editReply({ content: replyContent });
+            await interaction.editReply({content: replyContent});
 
         } catch (error) {
             this.container.logger.error('[ToggleCron] Failed to toggle cronjob:', error);
