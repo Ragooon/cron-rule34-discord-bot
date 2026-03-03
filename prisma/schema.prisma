@@ -1,0 +1,31 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Cronjob {
+  id             String   @id @default(uuid())
+  guildId        String
+  channelId      String
+  cronExpression String
+  booruSite      String   @default("safebooru")
+  timezone       String   @default("UTC")
+  tags           String[] @db.Text
+  message        String   @db.Text
+  name           String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([guildId])
+  @@index([isActive])
+  @@index([guildId, isActive])
+  @@map("cronjobs")
+}
