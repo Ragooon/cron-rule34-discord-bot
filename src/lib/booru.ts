@@ -105,6 +105,8 @@ class BooruServiceImpl implements IBooruService, IBooruApi {
     }
 
     public async getPostCount(tags: string[]): Promise<number> {
+        container.logger.info(`[BooruServiceFactory] Getting posts count`);
+        container.logger.info(`[BooruServiceFactory] URL: ${this.client.getPostCountUrl({tags})}`);
         return this.client.getPostCount(tags);
     }
 
@@ -117,6 +119,7 @@ class BooruServiceImpl implements IBooruService, IBooruApi {
         container.logger.debug(`[${this.siteDomain}] API Request: tags=[${tags.join(', ')}], page=${page || 0}`);
 
         const results = await this.client.search(tags, {limit: POST_LIMIT, random: false, page});
+        container.logger.info(this.client.getSearchUrl({tags, limit: POST_LIMIT, page}))
 
         const validPosts: BooruPost[] = [];
 
@@ -134,6 +137,7 @@ class BooruServiceImpl implements IBooruService, IBooruApi {
                 });
             }
         }
+
         return validPosts;
     }
 

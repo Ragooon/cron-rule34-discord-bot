@@ -1,4 +1,3 @@
-// prisma.config.ts (Jetzt im Hauptverzeichnis!)
 import 'dotenv/config';
 import { defineConfig, env } from 'prisma/config';
 

@@ -8,9 +8,13 @@ services:
     restart: unless-stopped
     environment:
       - DISCORD_TOKEN=${DISCORD_TOKEN}
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/rule34bot?schema=public
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/rule34bot?schema=public
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - RULE34_API_KEY=${RULE34_API_KEY}
+      - RULE34_USER_ID=${RULE34_USER_ID}
+      - GELBOORU_API_KEY=${GELBOORU_API_KEY}
+      - GELBOORU_USER_ID=${GELBOORU_USER_ID}
     depends_on:
       postgres:
         condition: service_healthy
@@ -44,7 +48,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: rule34bot
     ports:
       - "5432:5432"
